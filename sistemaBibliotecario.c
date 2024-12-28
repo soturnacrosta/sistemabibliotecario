@@ -1,4 +1,4 @@
-//v05
+//v06
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -21,11 +21,18 @@ typedef struct {
 void liberarLivro (livro *book){
 
     free (book->titulo);
+    book->titulo = NULL;
     free (book->autor);
+    book->autor = NULL;
 
 }
 
-void atualizarCadastro(FILE *arquivoBin, char* tituloBusca, char* novos_dados, int opcao);
+char condicao = 0;
+int encontrado; 
+
+//declare o protótipo da função antes!!
+void atualizarCadastro (FILE *arquivoBin, char* tituloBusca, char* novos_dados, int opcao);
+void removerCadastro (FILE *arquivoBin, char* tituloBusca);
 
 int main () {
 
@@ -33,9 +40,7 @@ int main () {
     Grave esses dados em um arquivo binário.
     Leia os dados do arquivo e os exiba no console.*/
 
-    char condicao = 0;
     char *pesquisaLivro;
-    int encontrado; 
     livro cadastro; //lembre-se de criar uma variável para a typedef 
 
     pesquisaLivro = malloc (50* sizeof (char));
@@ -51,7 +56,7 @@ int main () {
 
         }
 
-        printf ("Olá, digite 'R' para registrar uma pessoa, 'C' para consultar, 'A' para atualizar cadastro e 'F' para finalizar: \n");
+        printf ("Olá, digite 'V' para registrar um livro, 'C' para consultar, 'A' para atualizar cadastro e 'F' para finalizar: \n");
         scanf (" %c", &condicao);
 
 
@@ -61,7 +66,7 @@ int main () {
 
             }
 
-            while (condicao == 'r' || condicao == 'R'){
+            while (condicao == 'v' || condicao == 'V'){
 
                 cadastro.titulo = malloc (50 * sizeof (char));
                 cadastro.autor = malloc (50 * sizeof (char));
@@ -75,7 +80,7 @@ int main () {
                 printf("Digite o número de páginas: \n");
                 scanf("%d", &cadastro.paginas);
 
-                printf ("Digite 'R' para continuar, 'C' para consultar cadastros e 'F' para encerrar: \n");
+                printf ("Digite 'V' para continuar, 'C' para consultar cadastros e 'F' para encerrar: \n");
                 scanf (" %c", &condicao);
 
                 printf ("Cadastro realizado.\n");
@@ -190,7 +195,7 @@ int main () {
             
             }
 
-            while (condicao == 'a' || condicao == 'A') {
+            while (condicao == 'a' || condicao == 'A'){
                 
                 buscarDados busca;
                 busca.tituloBusca = malloc(50 * sizeof(char));
@@ -206,11 +211,30 @@ int main () {
 
                 atualizarCadastro(arquivoBin, busca.tituloBusca, busca.novos_dados, busca.opcao);
 
-                printf("Digite 'A' para continuar a atualizar ou 'F' para finalizar: ");
+                printf("Digite 'V' para continuar a atualizar ou 'F' para finalizar: ");
                 scanf(" %c", &condicao);
 
                 free(busca.tituloBusca);
                 free(busca.novos_dados);
+
+            }
+
+            while (condicao == 'R' || condicao == 'r'){
+
+                buscarDados busca;
+                busca.tituloBusca = malloc (50 * sizeof (char));
+                
+                printf ("Digite o título para remover: ");
+                scanf(" %49[^\n]", busca.tituloBusca);
+
+                removerCadastro (arquivoBin, busca.tituloBusca);
+
+                rewind(arquivoBin);
+
+                printf("Digite 'R' para continuar a atualizar ou 'F' para finalizar: ");
+                scanf(" %c", &condicao);
+
+                free(busca.tituloBusca);
 
             }
    
@@ -274,9 +298,117 @@ void atualizarCadastro(FILE *arquivoBin, char* tituloBusca, char* novos_dados, i
                 break;
             }
 
-        liberarLivro(&cadastro);
-    }
+            liberarLivro(&cadastro);
+            cadastro.titulo = NULL;
 
-    return (0);
+        }
 
 }
+
+void removerCadastro(FILE *arquivoBin, char* tituloBusca) {
+
+    livro cadastro;
+    size_t len_titulo, len_autor;
+    char confirma;
+    FILE *arquivoTemp;
+    arquivoTemp = fopen("biblioteca_temp.dat", "wb+");
+    int encontrado = 0;
+    
+        if (arquivoTemp == NULL) {
+            printf("Erro ao criar arquivo temporário.\n");
+            return;
+        }
+
+        rewind(arquivoBin);
+
+            while (fread(&len_titulo, sizeof(size_t), 1, arquivoBin) == 1) {
+                cadastro.titulo = malloc(len_titulo * sizeof(char));
+                fread(cadastro.titulo, sizeof(char), len_titulo, arquivoBin);
+                        if (cadastro.titulo == NULL) {
+                            printf("Erro ao alocar memória para o título.\n");
+                            fclose(arquivoTemp);
+                            return;
+                        }
+
+                fread(&len_autor, sizeof(size_t), 1, arquivoBin);
+                cadastro.autor = malloc(len_autor * sizeof(char));
+                fread(cadastro.autor, sizeof(char), len_autor, arquivoBin);
+                        if (cadastro.autor == NULL) {
+                            printf("Erro ao alocar memória para o título.\n");
+                            fclose(arquivoTemp);
+                            return;
+                        }
+
+                fread(&cadastro.paginas, sizeof(int), 1, arquivoBin);
+
+                if (strcmp(tituloBusca, cadastro.titulo) == 0 || strcmp(tituloBusca, cadastro.autor) == 0) {
+
+                    printf("Livro encontrado: %s, %s, %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
+                    printf ("Confirma remoção? Digite 's' para sim e 'n' para abortar exclusão:\n");
+                    scanf (" %c", &confirma);
+
+                    encontrado = 1;
+
+                        if (confirma == 's' || confirma == 'S') {
+                              
+                            printf ("Registro excluído com sucesso! Digite 'R' para continuar e 'F' para fechar: ");
+                            scanf (" %c", &condicao);
+
+                        }
+
+                        else {
+
+                            // Escreve no arquivo temporário, já que não foi removido
+                            fwrite(&len_titulo, sizeof(size_t), 1, arquivoTemp);
+                            fwrite(cadastro.titulo, sizeof(char), len_titulo, arquivoTemp);
+
+                            fwrite(&len_autor, sizeof(size_t), 1, arquivoTemp);
+                            fwrite(cadastro.autor, sizeof(char), len_autor, arquivoTemp);
+
+                            fwrite(&cadastro.paginas, sizeof(int), 1, arquivoTemp);
+
+                        }
+                
+                }
+
+                else {
+
+                // Escrever no arquivo temporário
+                fwrite(&len_titulo, sizeof(size_t), 1, arquivoTemp);
+                fwrite(cadastro.titulo, sizeof(char), len_titulo, arquivoTemp);
+
+                fwrite(&len_autor, sizeof(size_t), 1, arquivoTemp);
+                fwrite(cadastro.autor, sizeof(char), len_autor, arquivoTemp);
+
+                fwrite(&cadastro.paginas, sizeof(int), 1, arquivoTemp);
+
+                }
+
+                // Liberar memória
+                liberarLivro(&cadastro);
+                cadastro.titulo = NULL;
+        
+            }
+
+        if (!encontrado){
+
+            printf ("Registro não encotrado!\n");
+
+        }
+
+        else {
+        // Apagar o arquivo original e renomear o arquivo temporário para o nome original
+        // Fechar os arquivos>>>>>>>>>>>. NÃO FECHAR OS ARQUIVOS ATÉ QUE TUDO ESTEJA PRONTO!!!!
+        fclose(arquivoBin);
+        fclose(arquivoTemp);
+
+        remove("biblioteca.dat");
+        rename("biblioteca_temp.dat", "biblioteca.dat");
+
+        printf("Arquivo atualizado com sucesso.\n");
+
+        }
+
+}
+
+
