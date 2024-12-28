@@ -1,4 +1,4 @@
-//v04
+//v05
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -166,13 +166,13 @@ int main () {
                         break;
 
                     }
-
+                    
                     liberarLivro(&cadastro);
  
                 }
 
                     //ambos devem ser verdadeiros
-                    if (strcmp(pesquisaLivro, cadastro.titulo) != 0 && strcmp (pesquisaLivro, cadastro.autor) != 0) {
+                    if (!encontrado) {
 
                         printf ("Livro não encontrado.\n");
                         printf ("Digite 'C' para continuar e 'F' para sair.\n");
@@ -213,9 +213,7 @@ int main () {
                 free(busca.novos_dados);
 
             }
-
-        
-    
+   
     fclose (arquivoBin);
     free(pesquisaLivro);
     
@@ -261,9 +259,8 @@ void atualizarCadastro(FILE *arquivoBin, char* tituloBusca, char* novos_dados, i
 
                     cadastro.paginas = atoi(novos_dados); // Converte o novo dado para inteiro
                 }
-
-                long deslocamento = -(long)(sizeof(size_t) + len_titulo + sizeof(size_t) + len_autor + sizeof(int));
-                fseek(arquivoBin, deslocamento, SEEK_CUR);
+                
+                rewind(arquivoBin);//rewind cursor para consultar corretamente os dados alterados
 
                 fwrite(&len_titulo, sizeof(size_t), 1, arquivoBin);
                 fwrite(cadastro.titulo, sizeof(char), len_titulo, arquivoBin);
@@ -279,5 +276,7 @@ void atualizarCadastro(FILE *arquivoBin, char* tituloBusca, char* novos_dados, i
 
         liberarLivro(&cadastro);
     }
+
+    return (0);
 
 }
