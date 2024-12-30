@@ -1,4 +1,6 @@
-//v06
+//v0.9
+//VALGRIND APONTA 1 ERRO DE MEMORIA NA FUNÇÃO ATUALIZAR\\ERRO DE MEMORIA NO ADRESSSANITIZER
+//MENSAGENS DE DEPURAÇÃO VÃO JUNTO COM O PROGRAMA
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +31,7 @@ void liberarLivro (livro *book){
 
 char condicao = 0;
 int encontrado; 
+#define MAX_TAMANHO 1000
 
 //declare o protótipo da função antes!!
 void atualizarCadastro (FILE *arquivoBin, char* tituloBusca, char* novos_dados, int opcao);
@@ -56,7 +59,7 @@ int main () {
 
         }
 
-        printf ("Olá, digite 'V' para registrar um livro, 'C' para consultar, 'A' para atualizar cadastro e 'F' para finalizar: \n");
+        printf ("Olá, digite 'V' para registrar um livro, 'C' para consultar, 'A' para atualizar cadastro e 'R' para remover. Digite 'F' para finalizar: \n");
         scanf (" %c", &condicao);
 
 
@@ -82,7 +85,7 @@ int main () {
 
                 printf ("Cadastro realizado.\n");
 
-                printf ("Digite 'V' para continuar, 'C' para consultar cadastros, 'A' para atualizar cadastro e 'F' para encerrar: \n");
+                printf ("Digite 'V' para continuar, 'C' para consultar cadastros, 'A' para atualizar cadastro e 'R' para remover. Digite 'F' para encerrar: \n");
                 scanf (" %c", &condicao);
 
                 //REPOSICIONAR O CURSOR APÓS ENTRADA DE DADOS PARA GRAVAR
@@ -103,9 +106,8 @@ int main () {
 
                 // Gravar o número de páginas
                 fwrite(&cadastro.paginas, sizeof(int), 1, arquivoBin);
-                printf ("paginasss %d", cadastro.paginas);
 
-                printf ("%s, %s, %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
+                printf ("CADASTRADO: Título: %s, Autor: %s, Páginas: %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
 
                 liberarLivro (&cadastro);
                 
@@ -145,10 +147,32 @@ int main () {
 
                         //leitura um por um e só para se tornar verdadeiro
                         if (fread(&len_titulo, sizeof(size_t), 1, arquivoBin) != 1) break;
+
+                            if (len_titulo > MAX_TAMANHO) {
+
+                                printf("Erro: Tamanho de título muito grande! %zu\n", len_titulo);
+                                len_titulo = MAX_TAMANHO;  // Ajusta para o limite máximo
+
+                                break;  // Ou pode optar por continuar ou tratar o erro de outra forma
+                            }
+
+                        printf("Tentando alocar %zu bytes para o título.\n", len_titulo);
+
                         cadastro.titulo = realloc(cadastro.titulo, len_titulo * sizeof(char));
                         fread(cadastro.titulo, sizeof(char), len_titulo, arquivoBin);
 
                         if (fread(&len_autor, sizeof(size_t), 1, arquivoBin) != 1) break;
+                            
+                            printf("Tentando alocar %zu bytes para o autor.\n", len_autor);
+
+                                if (len_autor > MAX_TAMANHO) {
+
+                                    printf("Aviso: Tamanho de autor muito grande, ajustando para %d.\n", MAX_TAMANHO);
+                                    len_autor = MAX_TAMANHO;  // Ajusta para o limite máximo
+                                    break;
+
+                                }
+
                         cadastro.autor = realloc(cadastro.autor, len_autor * sizeof(char));
                         fread(cadastro.autor, sizeof(char), len_autor, arquivoBin);
 
@@ -218,6 +242,13 @@ int main () {
                 free(busca.tituloBusca);
                 free(busca.novos_dados);
 
+                    if (condicao == 'f' || condicao == 'F'){
+
+                        printf ("Fechando...");
+                        break;
+                        
+                    }
+
             }
 
             while (condicao == 'R' || condicao == 'r'){
@@ -234,6 +265,13 @@ int main () {
 
                 printf("Digite 'R' para continuar a atualizar ou 'F' para finalizar: ");
                 scanf(" %c", &condicao);
+
+
+                    if (condicao == 'f' || condicao == 'F'){
+
+                        printf ("Fechando...");
+                        
+                    }
 
                 free(busca.tituloBusca);
 
@@ -263,7 +301,9 @@ void atualizarCadastro(FILE *arquivoBin, char* tituloBusca, char* novos_dados, i
             fread(&cadastro.paginas, sizeof(int), 1, arquivoBin);
 
             if (strcmp(tituloBusca, cadastro.titulo) == 0 || strcmp(tituloBusca, cadastro.autor) == 0) {
-                printf("Livro encontrado: %s, %s, %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
+                printf("Livro encontrado: Título: %s, Autor: %s, Páginas: %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
+
+                encontrado = 1;
 
                 if (opcao == 1) {
                     free(cadastro.titulo);
@@ -303,6 +343,10 @@ void atualizarCadastro(FILE *arquivoBin, char* tituloBusca, char* novos_dados, i
             cadastro.titulo = NULL;
 
         }
+
+                if (!encontrado) {
+                printf("Registro não encontrado para atualização!\n");
+            }
 
 }
 
@@ -344,7 +388,7 @@ void removerCadastro(FILE *arquivoBin, char* tituloBusca) {
 
                 if (strcmp(tituloBusca, cadastro.titulo) == 0 || strcmp(tituloBusca, cadastro.autor) == 0) {
 
-                    printf("Livro encontrado: %s, %s, %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
+                    printf("Livro encontrado: Título: %s, Autor: %s, Páginas: %d\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
                     printf ("Confirma remoção? Digite 's' para sim e 'n' para abortar exclusão:\n");
                     scanf (" %c", &confirma);
 
@@ -367,6 +411,8 @@ void removerCadastro(FILE *arquivoBin, char* tituloBusca) {
                             fwrite(cadastro.autor, sizeof(char), len_autor, arquivoTemp);
 
                             fwrite(&cadastro.paginas, sizeof(int), 1, arquivoTemp);
+
+                            printf ("Remoção abortada! Fechando...\n");
 
                         }
                 
@@ -394,6 +440,7 @@ void removerCadastro(FILE *arquivoBin, char* tituloBusca) {
         if (!encontrado){
 
             printf ("Registro não encotrado!\n");
+            
 
         }
 
