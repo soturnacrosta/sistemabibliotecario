@@ -49,7 +49,7 @@ int main () {
 
         if (arquivoBin == NULL){
 
-            printf ("Erro ao abrir arquivo!");
+            printf ("Erro ao abrir arquivo! Criando um.");
             arquivoBin = fopen ("biblioteca.dat", "wb+"); //não devemos declarar novamente o FILE, apenas chamar a variável arquivo
 
             return 1;
@@ -80,10 +80,10 @@ int main () {
                 printf("Digite o número de páginas: \n");
                 scanf("%d", &cadastro.paginas);
 
-                printf ("Digite 'V' para continuar, 'C' para consultar cadastros e 'F' para encerrar: \n");
-                scanf (" %c", &condicao);
-
                 printf ("Cadastro realizado.\n");
+
+                printf ("Digite 'V' para continuar, 'C' para consultar cadastros, 'A' para atualizar cadastro e 'F' para encerrar: \n");
+                scanf (" %c", &condicao);
 
                 //REPOSICIONAR O CURSOR APÓS ENTRADA DE DADOS PARA GRAVAR
                 fseek(arquivoBin, 0, SEEK_END);
@@ -111,6 +111,7 @@ int main () {
                 
                 if (condicao == 'f' || condicao == 'F'){
 
+                    printf ("Fechando...");
                     break;
 
                 }
@@ -163,7 +164,7 @@ int main () {
 
                         printf ("Título: %s, Autor: %s, Número de páginas: %d.\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
 
-                            printf ("Digite 'C' para continuar e 'F' para sair.\n");
+                            printf ("Digite 'C' para continuar, 'A' para atualizar cadastro e 'F' para sair.\n");
                             scanf (" %c", &condicao);
                         
                         encontrado = 1;
@@ -211,7 +212,7 @@ int main () {
 
                 atualizarCadastro(arquivoBin, busca.tituloBusca, busca.novos_dados, busca.opcao);
 
-                printf("Digite 'V' para continuar a atualizar ou 'F' para finalizar: ");
+                printf("Digite 'A' para continuar a atualizar ou 'F' para finalizar: ");
                 scanf(" %c", &condicao);
 
                 free(busca.tituloBusca);
@@ -410,5 +411,3 @@ void removerCadastro(FILE *arquivoBin, char* tituloBusca) {
         }
 
 }
-
-
