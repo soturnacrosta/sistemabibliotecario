@@ -56,7 +56,7 @@ int main () {
 
         }
 
-        printf ("Olá, digite 'V' para registrar um livro, 'C' para consultar, 'A' para atualizar cadastro e 'F' para finalizar: \n");
+        printf ("Olá, digite 'V' para registrar um livro, 'C' para consultar, 'A' para atualizar cadastro e 'R' para remover. 'F' para finalizar: \n");
         scanf (" %c", &condicao);
 
 
@@ -82,7 +82,7 @@ int main () {
 
                 printf ("Cadastro realizado.\n");
 
-                printf ("Digite 'V' para continuar, 'C' para consultar cadastros, 'A' para atualizar cadastro e 'F' para encerrar: \n");
+                printf ("Digite 'V' para continuar, 'C' para consultar cadastros, 'A' para atualizar cadastro e 'R' para remover. 'F' para encerrar: \n");
                 scanf (" %c", &condicao);
 
                 //REPOSICIONAR O CURSOR APÓS ENTRADA DE DADOS PARA GRAVAR
@@ -161,7 +161,7 @@ int main () {
 
                         printf ("Título: %s, Autor: %s, Número de páginas: %d.\n", cadastro.titulo, cadastro.autor, cadastro.paginas);
 
-                            printf ("Digite 'C' para continuar, 'A' para atualizar cadastro e 'F' para sair.\n");
+                            printf ("Digite 'C' para continuar, 'A' para atualizar cadastro e 'R' para remover. 'F' para sair.\n");
                             scanf (" %c", &condicao);
                         
                         encontrado = 1;
