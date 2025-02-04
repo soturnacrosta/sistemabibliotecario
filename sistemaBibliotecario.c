@@ -119,7 +119,7 @@ int main () {
 
                 encontrado = 0; 
 
-                printf ("Digite título do livro ou ator que deseja pesquisar os dados: \n");
+                printf ("Digite título do livro ou autor que deseja pesquisar os dados: \n");
                 scanf(" %49[^\n]", pesquisaLivro);
 
                 rewind(arquivoBin);
@@ -200,7 +200,7 @@ int main () {
                 busca.novos_dados = malloc(50 * sizeof(char));
 
 
-                printf("Digite o título atualização: ");
+                printf("Digite o título ou autor para atualização: ");
                 scanf(" %49[^\n]", busca.tituloBusca);
                 printf("Digite os novos dados para atualização: ");
                 scanf(" %49[^\n]", busca.novos_dados);
