@@ -160,4 +160,8 @@ Evolução: Agora o software está completamente funcional, com todas as funçõ
 
 Versão 1.0.1: 
 
-- Retirados mensagens de depuração. 
+- Retirados mensagens de depuração; 
+
+- Corrigidas mensagens de interação com usuário: adicionada linha Remover cadastro. 
+
+ 
